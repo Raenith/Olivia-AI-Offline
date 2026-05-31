@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kamar Olivia — AI Demo</title>
+  <meta name="description" content="Masuk ke kamar virtual Olivia AI — Interaksi 100% offline berbasis WebGPU.">
+  <link rel="stylesheet" href="./css/style.css">
+  <style>
+    /* ──────────────────────────────────────────
+       GAME-SPECIFIC LAYOUT OVERRIDES
+       ────────────────────────────────────────── */
+    body { overflow: hidden; }
+
+    /* ── Full-screen Game Root ── */
+    #game-root {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--clr-bg-base);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Ambient background atmosphere */
+    #game-root::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 80% at 30% 50%, rgba(123,47,255,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 60% at 75% 80%, rgba(247,37,133,0.1) 0%, transparent 55%);
+      pointer-events: none;
+    }
+
+    /* ══════════════════════════════════════════
+       LOGIN SCREEN
+       ══════════════════════════════════════════ */
+    #login-section {
+      position: relative; z-index: 10;
+      width: 100%; height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.5s both;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 440px;
+      padding: var(--sp-10) var(--sp-8);
+      background: rgba(17,24,39,0.85);
+      backdrop-filter: blur(24px) saturate(160%);
+      -webkit-backdrop-filter: blur(24px) saturate(160%);
+      border: 1px solid var(--clr-border-medium);
+      border-radius: var(--r-2xl);
+      box-shadow: var(--shadow-lg), 0 0 60px rgba(123,47,255,0.18);
+      text-align: center;
+      animation: scaleIn 0.4s both;
+    }
+
+    .login-logo {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      background: linear-gradient(135deg, var(--clr-neon-pink), var(--clr-neon-violet));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: var(--sp-2);
+    }
+
+    .login-emoji {
+      font-size: 3.5rem;
+      display: block;
+      margin-bottom: var(--sp-4);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .login-subtitle {
+      color: var(--clr-text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: var(--sp-8);
+      line-height: 1.6;
+    }
+
+    .login-form { display: flex; flex-direction: column; gap: var(--sp-4); }
+
+    .input-label {
+      display: block;
+      font-size: 0.75rem;
+      font-family: var(--font-display);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--clr-text-muted);
+      margin-bottom: var(--sp-2);
+      text-align: left;
+    }
+
+    .login-error {
+      font-size: 0.8125rem;
+      color: var(--clr-danger);
+      min-height: 1.2em;
+      margin-top: calc(-1 * var(--sp-2));
+      text-align: left;
+    }
+
+    .login-features {
+      display: flex;
+      gap: var(--sp-3);
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: var(--sp-6);
+      padding-top: var(--sp-6);
+      border-top: 1px solid var(--clr-border-subtle);
+    }
+
+    .login-feature-pill {
+      font-size: 0.7rem;
+      color: var(--clr-text-muted);
+      display: flex;
+      align-items: center;
+      gap: var(--sp-1);
+      font-family: var(--font-display);
+      letter-spacing: 0.04em;
+    }
+
+    /* ══════════════════════════════════════════
+       GAME VIEWPORT — Two-Column Layout
+       ══════════════════════════════════════════ */
+    #game-section {
+      width: 100%; height: 100%;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      overflow: hidden;
+      animation: fadeIn 0.5s both;
+    }
+
+    /* ── LEFT PANEL: ROOM + CHARACTER ── */
+    .room-panel {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      background:
+        linear-gradient(
+          135deg,
+          rgba(30,27,75,0.75) 0%,
+          rgba(49,16,66,0.55) 40%,
+          rgba(17,24,39,0.88) 100%
+        );
+      border-right: 1px solid var(--clr-border-subtle);
+      overflow: hidden;
+    }
+
+    /* Scanline ambient effect */
+    .room-panel::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,0.04) 3px,
+        rgba(0,0,0,0.04) 4px
+      );
+      pointer-events: none; z-index: 1;
+    }
+
+    /* ── HUD BAR ── */
+    .room-hud {
+      position: relative; z-index: 5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--sp-3) var(--sp-4);
+      background: rgba(11,15,25,0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--clr-border-subtle);
+    }
+
+    .hud-left { display: flex; align-items: center; gap: var(--sp-3); }
+
+    .hud-brand {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      background: linear-gradient(135deg, var(--clr-neon-pink), var(--clr-neon-violet));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hud-divider { width: 1px; height: 18px; background: var(--clr-border-medium); }
+
+    .hud-user {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      font-size: 0.8125rem;
+      color: var(--clr-text-secondary);
+    }
+
+    .hud-user .avatar {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--clr-neon-pink), var(--clr-neon-violet));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    /* Status bar */
+    #status-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      font-size: 0.75rem;
+      color: var(--clr-text-secondary);
+      font-family: var(--font-display);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── CHARACTER STAGE ── */
+    .character-stage {
+      flex: 1;
+      position: relative; z-index: 2;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: var(--sp-4);
+      overflow: hidden;
+    }
+
+    /* Glow halo behind character */
+    .character-stage::before {
+      content: '';
+      position: absolute;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        rgba(219,39,119,0.18) 0%,
+        rgba(123,47,255,0.1) 40%,
+        transparent 70%
+      );
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .character-img {
+      height: 100%;
+      max-width: 1000%;
+      max-height: 5440px;
+      object-fit: contain;
+      filter:
+        drop-shadow(0 12px 32px rgba(0,0,0,0.7))
+        drop-shadow(0 0 20px rgba(219,39,119,0.35));
+      animation: float 5s ease-in-out infinite;
+      transition: filter var(--ease-normal);
+      position: relative; z-index: 2;
+      margin-bottom: -28px;
+    }
+
+    .character-img.thinking {
+      filter:
+        drop-shadow(0 12px 32px rgba(0,0,0,0.7))
+        drop-shadow(0 0 28px rgba(123,47,255,0.6));
+    }
+
+    /* AIRA mode — blue halo */
+    .character-img.aira-mode {
+      filter:
+        drop-shadow(0 12px 32px rgba(0,0,0,0.7))
+        drop-shadow(0 0 20px rgba(37,99,235,0.4));
+    }
+
+    .character-fallback {
+      font-size: 9rem;
+      animation: float 5s ease-in-out infinite;
+      filter: drop-shadow(0 0 24px rgba(219,39,119,0.5));
+      position: relative; z-index: 2;
+    }
+
+    /* ── EMOTION INDICATOR ── */
+    #emotion-indicator {
+      position: absolute;
+      top: var(--sp-3);
+      right: var(--sp-3);
+      z-index: 6;
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-1) var(--sp-3);
+      background: rgba(11,15,25,0.75);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--clr-border-subtle);
+      border-radius: var(--r-full);
+      font-size: 0.7rem;
+      font-family: var(--font-display);
+      letter-spacing: 0.06em;
+      color: var(--clr-text-muted);
+      opacity: 0;
+      transition: opacity var(--ease-normal);
+    }
+    #emotion-indicator.visible { opacity: 1; }
+
+    /* ── MODE SWITCHER TABS ── */
+    .mode-switcher {
+      position: relative; z-index: 5;
+      display: flex;
+      gap: var(--sp-2);
+      padding: var(--sp-3) var(--sp-4);
+      background: rgba(11,15,25,0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid var(--clr-border-subtle);
+    }
+
+    .mode-tab {
+      flex: 1;
+      padding: var(--sp-2) var(--sp-3);
+      border: 1px solid var(--clr-border-medium);
+      border-radius: var(--r-md);
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all var(--ease-fast);
+      background: var(--clr-bg-raised);
+      color: var(--clr-text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--sp-2);
+    }
+
+    /* Olivia tab — Pink active */
+    .mode-tab.active.olivia-tab {
+      background: linear-gradient(135deg, var(--clr-neon-pink), var(--clr-neon-violet));
+      color: #fff;
+      border-color: transparent;
+      box-shadow: var(--shadow-pink);
+    }
+
+    /* AIRA tab — Blue active */
+    .mode-tab.active.aira-tab {
+      background: linear-gradient(135deg, var(--clr-neon-blue), #1d4ed8);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: var(--shadow-blue);
+    }
+
+    .mode-tab:hover:not(.active) {
+      background: var(--clr-bg-overlay);
+      color: var(--clr-text-secondary);
+      border-color: var(--clr-border-medium);
+    }
+
+    /* ── RIGHT PANEL: CHAT ── */
+    .chat-panel {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: var(--clr-bg-surface);
+      overflow: hidden;
+    }
+
+    .chat-header {
+      padding: var(--sp-3) var(--sp-4);
+      border-bottom: 1px solid var(--clr-border-subtle);
+      background: var(--clr-bg-raised);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .chat-header-info { display: flex; align-items: center; gap: var(--sp-3); }
+
+    .chat-header-title {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--clr-text-muted);
+    }
+
+    /* Agent name badge in header */
+    #chat-agent-badge {
+      padding: 2px var(--sp-2);
+      border-radius: var(--r-full);
+      font-size: 0.65rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+    #chat-agent-badge.olivia {
+      background: rgba(219,39,119,0.18);
+      color: #f472b6;
+      border: 1px solid rgba(219,39,119,0.3);
+    }
+    #chat-agent-badge.aira {
+      background: rgba(37,99,235,0.18);
+      color: #60a5fa;
+      border: 1px solid rgba(37,99,235,0.3);
+    }
+
+    /* ── MESSAGES AREA ── */
+    #chat-box {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--sp-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-3);
+      scroll-behavior: smooth;
+    }
+
+    /* Individual message row */
+    .msg-row {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-1);
+      animation: fadeIn 0.25s both;
+    }
+    .msg-row.user { align-items: flex-end; }
+    .msg-row.ai   { align-items: flex-start; }
+
+    .msg-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      font-size: 0.7rem;
+      color: var(--clr-text-muted);
+      font-family: var(--font-display);
+      letter-spacing: 0.04em;
+    }
+    .msg-row.user .msg-meta { flex-direction: row-reverse; }
+
+    .msg-sender { font-weight: 700; }
+    .msg-sender.user   { color: #93c5fd; }
+    .msg-sender.olivia { color: #f472b6; }
+    .msg-sender.aira   { color: #60a5fa; }
+
+    .msg-bubble { max-width: 88%; }
+
+    /* Empty state */
+    .chat-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--sp-3);
+      text-align: center;
+      padding: var(--sp-8);
+    }
+    .chat-empty .empty-icon {
+      font-size: 3.5rem;
+      opacity: 0.5;
+      animation: float 4s ease-in-out infinite;
+    }
+    .chat-empty p {
+      font-size: 0.875rem;
+      color: var(--clr-text-muted);
+      line-height: 1.6;
+    }
+    .chat-empty .empty-hint {
+      font-size: 0.75rem;
+      color: var(--clr-text-muted);
+      opacity: 0.6;
+      font-family: var(--font-display);
+      letter-spacing: 0.08em;
+    }
+
+    /* ── INPUT AREA ── */
+    .chat-input-wrap {
+      padding: var(--sp-3) var(--sp-4);
+      background: var(--clr-bg-raised);
+      border-top: 1px solid var(--clr-border-subtle);
+      display: flex;
+      gap: var(--sp-2);
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    #user-input {
+      flex: 1;
+      padding: var(--sp-3) var(--sp-4);
+      background: var(--clr-bg-surface);
+      border: 1px solid var(--clr-border-medium);
+      border-radius: var(--r-full);
+      color: var(--clr-text-primary);
+      font-size: 0.875rem;
+      outline: none;
+      transition: all var(--ease-fast);
+    }
+    #user-input:focus {
+      border-color: var(--clr-neon-pink);
+      box-shadow: 0 0 0 3px rgba(247,37,133,0.15);
+      background: var(--clr-bg-raised);
+    }
+    #user-input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    #btn-send {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--clr-neon-pink), var(--clr-neon-violet));
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+      transition: all var(--ease-fast);
+      box-shadow: var(--shadow-pink);
+    }
+    #btn-send:hover { transform: scale(1.08); box-shadow: 0 0 20px rgba(247,37,133,0.6); }
+    #btn-send:active { transform: scale(0.95); }
+    #btn-send:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* AIRA mode send button */
+    #btn-send.aira-mode {
+      background: linear-gradient(135deg, var(--clr-neon-blue), #1d4ed8);
+      box-shadow: var(--shadow-blue);
+    }
+    #btn-send.aira-mode:hover { box-shadow: 0 0 20px rgba(37,99,235,0.6); }
+
+    /* ── AI LOADING OVERLAY ── */
+    #loading-overlay {
+      position: absolute; inset: 0; z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(11,15,25,0.93);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      gap: var(--sp-6);
+    }
+
+    .loading-card {
+      background: var(--clr-bg-raised);
+      border: 1px solid var(--clr-border-pink);
+      border-radius: var(--r-xl);
+      padding: var(--sp-8) var(--sp-10);
+      text-align: center;
+      box-shadow: var(--shadow-pink), var(--shadow-lg);
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .loading-spinner {
+      width: 52px; height: 52px;
+      margin: 0 auto var(--sp-5);
+      border-radius: 50%;
+      border: 3px solid var(--clr-bg-overlay);
+      border-top-color: var(--clr-neon-pink);
+      border-right-color: var(--clr-neon-violet);
+      animation: spin 0.8s linear infinite;
+    }
+
+    .loading-title {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--clr-text-primary);
+      margin-bottom: var(--sp-2);
+    }
+
+    #loading-status-text {
+      font-size: 0.8125rem;
+      color: var(--clr-text-muted);
+      line-height: 1.6;
+      min-height: 2.4em;
+    }
+
+    .loading-progress {
+      margin-top: var(--sp-5);
+      height: 4px;
+      background: var(--clr-bg-overlay);
+      border-radius: var(--r-full);
+      overflow: hidden;
+    }
+
+    .loading-progress-bar {
+      height: 100%;
+      border-radius: var(--r-full);
+      background: linear-gradient(90deg, var(--clr-neon-pink), var(--clr-neon-violet));
+      animation: progress-pulse 1.8s ease-in-out infinite alternate;
+    }
+
+    .loading-note {
+      font-size: 0.75rem;
+      color: var(--clr-text-muted);
+      text-align: center;
+      max-width: 320px;
+      line-height: 1.6;
+    }
+
+    /* ── KEYBOARD SHORTCUT HINTS ── */
+    .key-hint {
+      font-size: 0.65rem;
+      font-family: monospace;
+      background: var(--clr-bg-overlay);
+      border: 1px solid var(--clr-border-medium);
+      border-radius: var(--r-sm);
+      padding: 1px 5px;
+      color: var(--clr-text-muted);
+    }
+
+    /* ── RESPONSIVE: MOBILE STACK ── */
+    @media (max-width: 768px) {
+      #game-section {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+      }
+      .room-panel { min-height: 0; }
+      .chat-panel { min-height: 0; }
+      .character-img { height: 65%; }
+    }
+
+    @media (max-width: 480px) {
+      .login-card { margin: var(--sp-4); padding: var(--sp-8) var(--sp-5); }
+      .loading-card { padding: var(--sp-6) var(--sp-6); }
+    }
+  </style>
+</head>
+<body>
+<div id="game-root">
+
+  <!-- ═══════════════════════════════════════════════
+       LOGIN SCREEN
+       ═══════════════════════════════════════════════ -->
+  <div id="login-section">
+    <div class="login-card">
+      <span class="login-emoji">🌸</span>
+      <div class="login-logo">OLIVIA AI</div>
+      <p class="login-subtitle">
+        Masukkan nama Anda untuk memasuki kamar virtual.<br>
+        Data disimpan privat di browser Anda.
+      </p>
+
+      <div class="login-form">
+        <div>
+          <label class="input-label" for="username-input">Nama Panggilan</label>
+          <input
+            type="text"
+            id="username-input"
+            class="input input-lg"
+            placeholder="Contoh: Reza, Luna, Kai..."
+            maxlength="50"
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <div class="login-error" id="login-error" aria-live="polite"></div>
+        </div>
+
+        <button id="btn-login" class="btn btn-primary btn-lg w-full glow-pink">
+          🚪 Masuk Kamar
+        </button>
+
+        <a href="./index.html"
+           style="font-size: 0.8125rem; color: var(--clr-text-muted); text-align: center; display: block; margin-top: var(--sp-2);">
+          ← Kembali ke Beranda
+        </a>
+      </div>
+
+      <!-- Feature Pills -->
+      <div class="login-features">
+        <div class="login-feature-pill">🛡️ 100% Privat</div>
+        <div class="login-feature-pill">⚡ WebGPU Ready</div>
+        <div class="login-feature-pill">📴 Offline Mode</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       GAME VIEWPORT (hidden until login)
+       ═══════════════════════════════════════════════ -->
+  <div id="game-section" class="hidden">
+
+    <!-- ── LEFT: ROOM PANEL ── -->
+    <div class="room-panel">
+
+      <!-- HUD Bar -->
+      <div class="room-hud">
+        <div class="hud-left">
+          <span class="hud-brand">OLIVIA AI</span>
+          <div class="hud-divider"></div>
+          <div class="hud-user">
+            <div class="avatar" id="user-avatar">?</div>
+            <span id="user-label">—</span>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap: var(--sp-3);">
+          <div id="status-bar">
+            <span class="status-dot offline" id="status-dot"></span>
+            <span id="status-text">Inisialisasi...</span>
+          </div>
+          <button id="btn-logout" class="btn btn-danger btn-xs">✕ Keluar</button>
+        </div>
+      </div>
+
+      <!-- Emotion Indicator -->
+      <div id="emotion-indicator">
+        <span id="emotion-emoji">💗</span>
+        <span id="emotion-label">Normal</span>
+      </div>
+
+      <!-- Character Stage -->
+      <div class="character-stage">
+        <img
+          id="character-img"
+          src="./assets/olivia-normal.png"
+          alt="Olivia"
+          class="character-img"
+          onerror="this.style.display='none'; document.getElementById('character-fallback').style.display='block';"
+        >
+        <div id="character-fallback" class="character-fallback" style="display:none;">🌸</div>
+      </div>
+
+      <!-- Mode Switcher Tabs -->
+      <div class="mode-switcher">
+        <button
+          id="tab-olivia"
+          class="mode-tab olivia-tab active"
+          aria-pressed="true"
+          title="Chat dengan Olivia (Ctrl+1)">
+          💬 Chat Olivia <span class="key-hint">^1</span>
+        </button>
+        <button
+          id="tab-aira"
+          class="mode-tab aira-tab"
+          aria-pressed="false"
+          title="AIRA Customer Service (Ctrl+2)">
+          🔧 AIRA Support <span class="key-hint">^2</span>
+        </button>
+      </div>
+    </div><!-- /.room-panel -->
+
+    <!-- ── RIGHT: CHAT PANEL ── -->
+    <div class="chat-panel">
+      <div class="chat-header">
+        <div class="chat-header-info">
+          <span class="chat-header-title" id="chat-header-label">📜 Log Interaksi</span>
+          <span id="chat-agent-badge" class="olivia">Olivia</span>
+        </div>
+        <button id="btn-clear-chat" class="btn btn-xs btn-danger" title="Hapus riwayat chat ini">
+          🗑 Hapus
+        </button>
+      </div>
+
+      <!-- Messages Log -->
+      <div
+        id="chat-box"
+        role="log"
+        aria-live="polite"
+        aria-label="Chat messages">
+        <!-- Populated dynamically by main.js -->
+      </div>
+
+      <!-- Input Bar -->
+      <div class="chat-input-wrap">
+        <input
+          type="text"
+          id="user-input"
+          placeholder="Ketik pesan..."
+          autocomplete="off"
+          spellcheck="false"
+          maxlength="500"
+          aria-label="Pesan untuk Olivia"
+        >
+        <button id="btn-send" aria-label="Kirim pesan">➤</button>
+      </div>
+    </div><!-- /.chat-panel -->
+
+    <!-- ── AI LOADING OVERLAY ── -->
+    <div
+      id="loading-overlay"
+      class="hidden"
+      role="status"
+      aria-label="Memuat AI Engine">
+      <div class="loading-card">
+        <div class="loading-spinner"></div>
+        <div class="loading-title">Memuat AI Engine</div>
+        <p id="loading-status-text">Menyiapkan model...</p>
+        <div class="loading-progress">
+          <div class="loading-progress-bar"></div>
+        </div>
+      </div>
+      <p class="loading-note">
+        Download model hanya diperlukan sekali (~600MB–1.2GB).<br>
+        Setelah itu berjalan 100% offline tanpa internet.
+      </p>
+    </div>
+
+  </div><!-- /#game-section -->
+
+</div><!-- /#game-root -->
+
+<script type="module" src="./js/main.js"></script>
+</body>
+</html>

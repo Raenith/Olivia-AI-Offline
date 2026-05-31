@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kebijakan Privasi — OLIVIA AI</title>
+  <meta name="description" content="Kebijakan Privasi Olivia AI: Penjelasan transparan mengenai sistem Edge AI 100% offline dan pemrosesan data lokal.">
+  <link rel="stylesheet" href="./css/style.css">
+  <style>
+    /* ─── DESIGN SYSTEM FALLBACKS & VARIABLES ─── */
+    :root {
+      --font-display: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --clr-bg-body: #0b0f19;
+      --clr-bg-surface: #111827;
+      --clr-bg-raised: #1f2937;
+      --clr-text-primary: #f9fafb;
+      --clr-text-secondary: #d1d5db;
+      --clr-text-muted: #9ca3af;
+      --clr-neon-pink: #f72585;
+      --clr-neon-violet: #7b2fff;
+      --clr-neon-cyan: #00f5d4;
+      --clr-neon-green: #10b981;
+      --clr-border-subtle: rgba(255, 255, 255, 0.05);
+      --clr-border-medium: rgba(255, 255, 255, 0.1);
+      --clr-border-pink: rgba(247, 37, 133, 0.4);
+      
+      --sp-2: 0.5rem;
+      --sp-3: 0.75rem;
+      --sp-4: 1rem;
+      --sp-5: 1.25rem;
+      --sp-6: 1.5rem;
+      --sp-8: 2rem;
+      --sp-10: 2.5rem;
+      --sp-12: 3rem;
+      --sp-16: 4rem;
+      --sp-20: 5rem;
+      
+      --r-xl: 12px;
+      --r-2xl: 16px;
+      --r-full: 9999px;
+      
+      --ease-fast: cubic-bezier(0.4, 0, 0.2, 1);
+      --ease-normal: cubic-bezier(0.4, 0, 0.2, 1);
+      
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+      --shadow-pink: 0 0 20px rgba(247, 37, 133, 0.25);
+    }
+
+    body {
+      background-color: var(--clr-bg-body);
+      color: var(--clr-text-secondary);
+      font-family: var(--font-display);
+      margin: 0;
+      padding: 0;
+      line-height: 1.75;
+    }
+
+    /* ─── NAVBAR REUSE ─── */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--sp-4) var(--sp-8);
+      background: rgba(11, 15, 25, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--clr-border-subtle);
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+    }
+    .navbar-brand {
+      font-family: var(--font-display);
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      color: var(--clr-text-primary);
+      text-decoration: none;
+    }
+    .navbar-links {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: var(--sp-6);
+      margin: 0; padding: 0;
+    }
+    .navbar-link {
+      color: var(--clr-text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: color var(--ease-fast);
+    }
+    .navbar-link:hover {
+      color: var(--clr-neon-pink);
+    }
+
+    /* ─── PRIVACY HERO HEADER ─── */
+    .privacy-header {
+      position: relative;
+      padding: var(--sp-20) var(--sp-6) var(--sp-10);
+      text-align: center;
+      overflow: hidden;
+      border-bottom: 1px solid var(--clr-border-subtle);
+    }
+    .privacy-header::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% -10%, rgba(123,47,255,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .privacy-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      color: var(--clr-text-primary);
+      margin-bottom: var(--sp-3);
+      letter-spacing: -0.02em;
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, var(--clr-neon-pink), var(--clr-neon-violet));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .privacy-subtitle {
+      color: var(--clr-text-muted);
+      font-size: clamp(0.95rem, 2vw, 1.1rem);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* ─── CONTENT LAYOUT ─── */
+    .privacy-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: var(--sp-12) var(--sp-6);
+    }
+
+    /* ─── HIGHLIGHT BOX / CARD ─── */
+    .core-promise-box {
+      background: linear-gradient(135deg, rgba(247,37,133,0.05), rgba(123,47,255,0.05));
+      border: 1px solid var(--clr-border-pink);
+      border-radius: var(--r-2xl);
+      padding: var(--sp-6) var(--sp-8);
+      margin-bottom: var(--sp-12);
+      box-shadow: var(--shadow-pink);
+    }
+    .core-promise-box h3 {
+      margin-top: 0;
+      color: var(--clr-text-primary);
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+    }
+
+    /* ─── SECTIONS ─── */
+    .policy-section {
+      margin-bottom: var(--sp-10);
+    }
+    .policy-section h2 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      color: var(--clr-text-primary);
+      border-left: 3px solid var(--clr-neon-pink);
+      padding-left: var(--sp-3);
+      margin-bottom: var(--sp-4);
+    }
+    .policy-section p {
+      color: var(--clr-text-secondary);
+      margin-bottom: var(--sp-4);
+    }
+
+    /* ─── LIST ITEMS OR SUB-CARDS ─── */
+    .tech-list {
+      list-style: none;
+      padding: 0;
+      margin: var(--sp-4) 0;
+    }
+    .tech-list-item {
+      background: var(--clr-bg-surface);
+      border: 1px solid var(--clr-border-subtle);
+      border-radius: var(--r-xl);
+      padding: var(--sp-4) var(--sp-5);
+      margin-bottom: var(--sp-3);
+      transition: border-color var(--ease-fast);
+    }
+    .tech-list-item:hover {
+      border-color: var(--clr-border-medium);
+    }
+    .tech-list-title {
+      font-weight: bold;
+      color: var(--clr-text-primary);
+      margin-bottom: var(--sp-1);
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+    }
+    .tech-tag {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: var(--r-full);
+      font-family: monospace;
+      text-transform: uppercase;
+    }
+    .tag-storage { background: rgba(0,245,212,0.15); color: var(--clr-neon-cyan); }
+    .tag-gpu { background: rgba(123,47,255,0.15); color: #a78bfa; }
+
+    /* ─── FOOTER ─── */
+    .footer {
+      padding: var(--sp-8) var(--sp-6);
+      border-top: 1px solid var(--clr-border-subtle);
+      background: rgba(17,24,39,0.4);
+    }
+    .footer-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--sp-4);
+    }
+    .footer-brand {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 1.1rem;
+      letter-spacing: 0.12em;
+    }
+    .gradient-text-pink {
+      background: linear-gradient(135deg, var(--clr-neon-pink), #f472b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .footer-links { display: flex; gap: var(--sp-6); }
+    .footer-link {
+      font-size: 0.8125rem;
+      color: var(--clr-text-muted);
+      text-decoration: none;
+      transition: color var(--ease-fast);
+    }
+    .footer-link:hover { color: var(--clr-neon-pink); }
+    .footer-copy {
+      font-size: 0.8rem;
+      color: var(--clr-text-muted);
+      text-align: center;
+      width: 100%;
+      margin-top: var(--sp-4);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-2) var(--sp-4);
+      border-radius: var(--r-xl);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: all var(--ease-fast);
+    }
+    .btn-ghost {
+      color: var(--clr-text-primary);
+      border: 1px solid var(--clr-border-medium);
+    }
+    .btn-ghost:hover {
+      background: var(--clr-bg-surface);
+      border-color: var(--clr-text-muted);
+    }
+
+    /* Animations styling matching landing page */
+    .fade-in {
+      animation: fadeIn 0.8s ease-out both;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 640px) {
+      .navbar { padding: var(--sp-4); }
+      .navbar-links { gap: var(--sp-4); }
+      .footer-inner { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAVBAR ── -->
+  <nav class="navbar">
+    <a href="./index.html" class="navbar-brand">OLIVIA AI</a>
+    <ul class="navbar-links">
+      <li><a href="./index.html#fitur" class="navbar-link">Fitur</a></li>
+      <li><a href="./index.html#agent" class="navbar-link">Agent</a></li>
+      <li><a href="./game.html" class="navbar-link">Kamar Virtual</a></li>
+      <li><a href="./index.html" class="btn btn-ghost">🏠 Kembali</a></li>
+    </ul>
+  </nav>
+
+  <!-- ── PRIVACY HERO HEADER ── -->
+  <header class="privacy-header fade-in">
+    <h1 class="privacy-title">Kebijakan <span class="gradient-text">Privasi</span> Mutlak</h1>
+    <p class="privacy-subtitle">
+      Arsitektur Client-Side Edge AI menjamin tidak ada satu kata pun yang meninggalkan perangkat Anda. Privasi Anda bukan opsi, melainkan sistem bawaan.
+    </p>
+  </header>
+
+  <!-- ── PRIVACY CONTENT CONTAINER ── -->
+  <main class="privacy-container fade-in" style="animation-delay: 0.1s;">
+    
+    <!-- Core Promise Box -->
+    <section class="core-promise-box">
+      <h3>🛡️ Komitmen 0MB Data ke Cloud</h3>
+      <p style="margin: 0; font-size: 0.95rem; color: var(--clr-text-primary);">
+        Olivia AI dibangun menggunakan teknologi modern <strong>Transformers.js v3</strong> dan akselerasi <strong>WebGPU</strong>. Seluruh proses pengolahan bahasa alami, analisis emosi, dan penyimpanan memori dilakukan 100% secara lokal pada browser Anda.
+      </p>
+    </section>
+
+    <!-- Section 1 -->
+    <section class="policy-section">
+      <h2>1. Pengumpulan dan Pemrosesan Data</h2>
+      <p>
+        Kami memegang prinsip dasar privasi digital: <strong>Kami tidak dapat mengambil data yang tidak pernah kami kumpulkan.</strong>
+      </p>
+      <p>
+        Saat Anda mengetik pesan, berinteraksi dengan Olivia Valen (Companion Mode), atau berkonsultasi dengan AIRA ACS (Support Mode), seluruh teks tersebut diproses secara real-time langsung oleh core GPU/CPU komputer Anda sendiri. Tidak ada server perantara, tidak ada log eksternal, dan tidak ada API pihak ketiga yang terlibat dalam merajut obrolan tersebut.
+      </p>
+    </section>
+
+    <!-- Section 2 -->
+    <section class="policy-section">
+      <h2>2. Teknologi Penyimpanan Lokal</h2>
+      <p>
+        Untuk memberikan pengalaman interaksi yang kontekstual dan mengingat preferensi Anda, kami menggunakan sistem penyimpanan bawaan browser sandboxed:
+      </p>
+      <ul class="tech-list">
+        <li class="tech-list-item">
+          <div class="tech-list-title">Riwayat Percakapan (Multi-turn Memory) <span class="tech-tag tag-storage">LocalStorage</span></div>
+          <div>Riwayat chat disimpan per username dan dioptimalkan secara dinamis menggunakan metode sliding window (4 pasangan obrolan terakhir). Data obrolan ini menetap di browser Anda sendiri.</div>
+        </li>
+        <li class="tech-list-item">
+          <div class="tech-list-title">Model Weights Caching <span class="tech-tag tag-storage">Cache Storage / IndexedDB</span></div>
+          <div>Ketika Anda pertama kali membuka Kamar Virtual, browser mengunduh model bahasa <strong>Llama 3.2 1B (ONNX)</strong>. File model ini disimpan di memori browser Anda agar selanjutnya aplikasi dapat dijalankan 100% Offline.</div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Section 3 -->
+    <section class="policy-section">
+      <h2>3. Pemrosesan Logika Cerdas AI</h2>
+      <p>
+        Dua modul utama pada ekosistem Olivia AI beroperasi dengan batasan privasi yang ketat:
+      </p>
+      <p>
+        • <strong>Emotion Detection Engine (Olivia):</strong> Menganalisis token input teks secara lokal untuk mendeteksi sentimen negatif/positif, kemudian memodifikasi bobot sistem prompt internal agar merespons secara hangat tanpa mengirim data analisis ke luar komputer.
+      </p>
+      <p>
+        • <strong>Local RAG Engine (AIRA ACS):</strong> Pencarian dokumen pengetahuan teknis seputar kendala game dilakukan melalui skrip pencarian teks berbasis JSON lokal (Keyword-Matching) tanpa memanggil database cloud eksternal.
+      </p>
+    </section>
+
+    <!-- Section 4 -->
+    <section class="policy-section">
+      <h2>4. Kontrol Penuh Pengguna</h2>
+      <p>
+        Karena seluruh data berada di bawah kendali penuh perangkat Anda, Anda memiliki hak mutlak untuk:
+      </p>
+      <p>
+        • Menghapus seluruh riwayat percakapan secara langsung kapan pun melalui opsi hapus chat di antarmuka game.
+      </p>
+      <p>
+        • Mengosongkan penyimpanan aplikasi dengan membersihkan data situs (Clear Site Data / Cache) pada pengaturan browser Anda, yang akan langsung menghapus seluruh sisa memori interaksi AI.
+      </p>
+    </section>
+
+    <!-- Section 5 -->
+    <section class="policy-section">
+      <h2>5. Perubahan Kebijakan Privasi</h2>
+      <p>
+        Karena aplikasi ini bersifat *fully client-side* (Edge AI), pembaruan di masa mendatang tidak akan pernah merubah fundamental privasi lokal ini. Jika ada perubahan fungsionalitas, kode sumber kami tetap dapat diaudit secara terbuka guna memastikan keamanan data Anda tetap terjaga.
+      </p>
+    </section>
+
+  </main>
+
+  <!-- ── FOOTER ── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand gradient-text-pink">OLIVIA AI</div>
+
+      <div class="footer-links">
+        <a href="./index.html#fitur" class="footer-link">Fitur</a>
+        <a href="./game.html" class="footer-link">Demo</a>
+        <a href="#" class="footer-link" style="color: var(--clr-neon-pink);">Privasi</a>
+        <a href="https://github.com/Raenith/Olivia-AI-Offline" target="_blank" class="footer-link" target="_blank" rel="noopener">GitHub</a>
+      </div>
+
+      <p class="footer-copy">
+        &copy; 2026 AIRA Project — Client-Side Edge AI · WebGPU · 100% Offline · Zero Server Cost
+        <br>Dikembangkan untuk kompetisi "Build Real AI Agent. Solve Real Problems" — Qhomemart
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // Smooth scroll configuration
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', e => {
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    // Handle initial block visibility for animation matching landing page setup
+    const observer = new IntersectionObserver(
+      entries => entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.animationPlayState = 'running';
+          observer.unobserve(entry.target);
+        }
+      }),
+      { threshold: 0.1 }
+    );
+
+    document.querySelectorAll('.fade-in').forEach(el => {
+      el.style.animationPlayState = 'running'; // Ensures smooth execution
+    });
+  </script>
+</body>
+</html>

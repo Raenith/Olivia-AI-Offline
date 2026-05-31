@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OLIVIA AI — Virtual Companion Experience</title>
+  <meta name="description" content="Olivia AI: Teman virtual 100% offline berbasis Edge AI lokal. Privat, cepat, tanpa sensor, tanpa cloud.">
+  <link rel="stylesheet" href="./css/style.css">
+  <style>
+    /* ─── HERO ─── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: var(--sp-20) var(--sp-6) var(--sp-16);
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 90% 70% at 50% -5%, rgba(123,47,255,0.32) 0%, transparent 62%),
+        radial-gradient(ellipse 55% 45% at 85% 85%, rgba(247,37,133,0.22) 0%, transparent 52%),
+        radial-gradient(ellipse 40% 40% at 10% 70%, rgba(0,245,212,0.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(247,37,133,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(247,37,133,0.035) 1px, transparent 1px);
+      background-size: 64px 64px;
+      pointer-events: none;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      margin-bottom: var(--sp-6);
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeIn 0.6s both;
+    }
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 8vw, 5.5rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      margin-bottom: var(--sp-6);
+      animation: slideUp 0.7s 0.1s both;
+    }
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--clr-text-secondary);
+      max-width: 600px;
+      margin: 0 auto var(--sp-10);
+      line-height: 1.75;
+      animation: slideUp 0.7s 0.2s both;
+    }
+    .hero-cta {
+      display: flex;
+      gap: var(--sp-4);
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: slideUp 0.7s 0.3s both;
+    }
+
+    /* ─── BROWSER PREVIEW WINDOW ─── */
+    .hero-preview {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 820px;
+      margin: var(--sp-16) auto 0;
+      animation: fadeIn 1s 0.5s both;
+    }
+    .preview-window {
+      background: var(--clr-bg-surface);
+      border: 1px solid var(--clr-border-medium);
+      border-radius: var(--r-2xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg), 0 0 80px rgba(123,47,255,0.18);
+    }
+    .preview-titlebar {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-3) var(--sp-4);
+      background: var(--clr-bg-raised);
+      border-bottom: 1px solid var(--clr-border-subtle);
+    }
+    .preview-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .preview-dot.red    { background: #ef4444; }
+    .preview-dot.yellow { background: #f59e0b; }
+    .preview-dot.green  { background: #10b981; }
+    .preview-address {
+      flex: 1;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--clr-text-muted);
+      font-family: monospace;
+    }
+    .preview-body {
+      height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg,
+        rgba(30,27,75,0.6),
+        rgba(49,16,66,0.5),
+        rgba(17,24,39,0.8));
+      position: relative;
+      overflow: hidden;
+    }
+    .preview-body::before {
+      content: '';
+      position: absolute;
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(247,37,133,0.25), transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation: neon-pulse 3s ease-in-out infinite;
+    }
+    .preview-placeholder {
+      position: relative; z-index: 1;
+      text-align: center;
+    }
+    .preview-placeholder .icon {
+      font-size: 4.5rem;
+      display: block;
+      margin-bottom: var(--sp-3);
+      animation: float 3s ease-in-out infinite;
+    }
+    .preview-placeholder p {
+      color: var(--clr-text-muted);
+      font-size: 0.875rem;
+      font-family: var(--font-display);
+      letter-spacing: 0.1em;
+    }
+
+    /* ─── SECTION LABEL ─── */
+    .section-label {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--clr-neon-pink);
+      margin-bottom: var(--sp-4);
+      display: block;
+    }
+
+    /* ─── STATS ROW ─── */
+    .stats-section {
+      padding: var(--sp-12) var(--sp-6);
+      border-top: 1px solid var(--clr-border-subtle);
+      border-bottom: 1px solid var(--clr-border-subtle);
+    }
+    .stats-row {
+      display: flex;
+      gap: var(--sp-8);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .stat-item { text-align: center; }
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--clr-neon-pink), var(--clr-neon-violet));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.78rem;
+      color: var(--clr-text-muted);
+      margin-top: var(--sp-2);
+      font-family: var(--font-display);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* ─── FEATURES SECTION ─── */
+    .features-section {
+      padding: var(--sp-20) var(--sp-6);
+      position: relative;
+    }
+    .feature-card {
+      padding: var(--sp-6);
+      background: rgba(17,24,39,0.6);
+      border: 1px solid var(--clr-border-subtle);
+      border-radius: var(--r-xl);
+      transition: all var(--ease-normal);
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(247,37,133,0.05), transparent);
+      opacity: 0;
+      transition: opacity var(--ease-normal);
+    }
+    .feature-card:hover {
+      border-color: var(--clr-border-pink);
+      box-shadow: var(--shadow-pink), var(--shadow-md);
+      transform: translateY(-6px);
+    }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-card h4 {
+      font-size: 1rem;
+      margin-bottom: var(--sp-3);
+      color: var(--clr-text-primary);
+    }
+    .feature-card p {
+      font-size: 0.875rem;
+      line-height: 1.65;
+      color: var(--clr-text-secondary);
+      margin: 0;
+    }
+
+    /* ─── ABOUT 2-COL ─── */
+    .about-section { padding: var(--sp-20) var(--sp-6); }
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-12);
+      align-items: center;
+    }
+    .about-visual {
+      background: linear-gradient(135deg, rgba(30,27,75,0.5), rgba(49,16,66,0.4));
+      border: 1px solid var(--clr-border-medium);
+      border-radius: var(--r-xl);
+      aspect-ratio: 4/3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      box-shadow: var(--shadow-violet);
+    }
+    .about-visual-icon {
+      font-size: 6rem;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    /* ─── AGENT CARDS ─── */
+    .agent-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-6);
+      margin-top: var(--sp-10);
+    }
+    .agent-card {
+      padding: var(--sp-6);
+      border-radius: var(--r-xl);
+      border: 1px solid;
+      transition: all var(--ease-normal);
+    }
+    .agent-card.olivia {
+      background: rgba(219,39,119,0.08);
+      border-color: rgba(219,39,119,0.3);
+    }
+    .agent-card.olivia:hover {
+      background: rgba(219,39,119,0.14);
+      box-shadow: 0 0 32px rgba(219,39,119,0.3);
+      transform: translateY(-4px);
+    }
+    .agent-card.aira {
+      background: rgba(37,99,235,0.08);
+      border-color: rgba(37,99,235,0.3);
+    }
+    .agent-card.aira:hover {
+      background: rgba(37,99,235,0.14);
+      box-shadow: 0 0 32px rgba(37,99,235,0.3);
+      transform: translateY(-4px);
+    }
+    .agent-name {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 900;
+      margin-bottom: var(--sp-2);
+    }
+    .agent-card.olivia .agent-name { color: #f472b6; }
+    .agent-card.aira   .agent-name { color: #60a5fa; }
+    .agent-role {
+      font-size: 0.75rem;
+      font-family: var(--font-display);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: var(--sp-3);
+    }
+    .agent-card.olivia .agent-role { color: rgba(244,114,182,0.7); }
+    .agent-card.aira   .agent-role { color: rgba(96,165,250,0.7); }
+
+    /* ─── CTA SECTION ─── */
+    .cta-section {
+      padding: var(--sp-20) var(--sp-6);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 100% at 50% 50%, rgba(247,37,133,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cta-section > * { position: relative; z-index: 1; }
+
+    /* ─── FOOTER ─── */
+    .footer {
+      padding: var(--sp-8) var(--sp-6);
+      border-top: 1px solid var(--clr-border-subtle);
+    }
+    .footer-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--sp-4);
+    }
+    .footer-brand {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 1.1rem;
+      letter-spacing: 0.12em;
+    }
+    .footer-links { display: flex; gap: var(--sp-6); }
+    .footer-link {
+      font-size: 0.8125rem;
+      color: var(--clr-text-muted);
+      transition: color var(--ease-fast);
+    }
+    .footer-link:hover { color: var(--clr-neon-pink); }
+    .footer-copy {
+      font-size: 0.8rem;
+      color: var(--clr-text-muted);
+      text-align: center;
+      width: 100%;
+      margin-top: var(--sp-4);
+    }
+
+    /* ─── TECH SPECS STRIP ─── */
+    .tech-strip {
+      display: flex;
+      gap: var(--sp-4);
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      padding: var(--sp-6);
+      border-top: 1px solid var(--clr-border-subtle);
+      border-bottom: 1px solid var(--clr-border-subtle);
+      background: rgba(17,24,39,0.5);
+    }
+    .tech-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: var(--sp-2) var(--sp-4);
+      background: var(--clr-bg-raised);
+      border: 1px solid var(--clr-border-medium);
+      border-radius: var(--r-full);
+      font-size: 0.78rem;
+      color: var(--clr-text-secondary);
+      font-family: var(--font-display);
+      letter-spacing: 0.04em;
+    }
+    .tech-pill .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--clr-neon-green);
+      box-shadow: 0 0 6px var(--clr-neon-green);
+    }
+
+    @media (max-width: 768px) {
+      .about-grid  { grid-template-columns: 1fr; }
+      .agent-grid  { grid-template-columns: 1fr; }
+      .stats-row   { gap: var(--sp-6); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAVBAR ── -->
+  <nav class="navbar">
+    <div class="navbar-brand">OLIVIA AI</div>
+    <ul class="navbar-links">
+      <li><a href="#fitur"   class="navbar-link">Fitur</a></li>
+      <li><a href="#agent"   class="navbar-link">Agent</a></li>
+      <li><a href="#tentang" class="navbar-link">Tentang</a></li>
+      <li>
+        <a href="./game.html" class="btn btn-primary btn-sm glow-pink">
+          ▶ Main Demo
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <span class="badge badge-violet">WebGPU Powered</span>
+        <span class="badge badge-pink">100% Offline</span>
+        <span class="badge badge-cyan">AI Lokal</span>
+        <span class="badge badge-green">Zero Server Cost</span>
+      </div>
+
+      <h1 class="hero-title">
+        Teman Bicara<br>
+        <span class="gradient-text">Nyata</span> di Ruang<br>
+        Virtual Anda
+      </h1>
+
+      <p class="hero-sub">
+        Rasakan interaksi dinamis bersama Olivia langsung di kamar virtual.
+        Berjalan penuh di GPU browser — tanpa tracking, tanpa cloud, tanpa biaya server.
+        Privasi mutlak terjamin.
+      </p>
+
+      <div class="hero-cta">
+        <a href="./game.html" class="btn btn-primary btn-lg glow-pink">
+          🎮 Coba Demo Sekarang
+        </a>
+        <a href="#tentang" class="btn btn-ghost btn-lg">
+          📖 Pelajari Lebih
+        </a>
+      </div>
+    </div>
+
+    <!-- Browser Preview Window -->
+    <div class="hero-preview">
+      <div class="preview-window">
+        <div class="preview-titlebar">
+          <span class="preview-dot red"></span>
+          <span class="preview-dot yellow"></span>
+          <span class="preview-dot green"></span>
+          <span class="preview-address">olivia-ai.local / kamar-virtual — WebGPU Active</span>
+        </div>
+        <div class="preview-body">
+          <div class="preview-placeholder">
+            <span class="icon"><img src="./assets/olivia-normal.png" alt="🌸" /></span>
+            <p>Kamar Virtual Olivia — Edge AI Active</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TECH STRIP ── -->
+  <div class="tech-strip">
+    <div class="tech-pill"><span class="dot"></span> Transformers.js v3</div>
+    <div class="tech-pill"><span class="dot"></span> WebGPU Acceleration</div>
+    <div class="tech-pill"><span class="dot"></span> Llama 3.2 1B (ONNX)</div>
+    <div class="tech-pill"><span class="dot"></span> LocalStorage Memory</div>
+    <div class="tech-pill"><span class="dot"></span> Keyword RAG Engine</div>
+    <div class="tech-pill"><span class="dot"></span> Emotion Detection</div>
+  </div>
+
+  <!-- ── STATS ── -->
+  <section class="stats-section">
+    <div class="stats-row">
+      <div class="stat-item fade-in">
+        <div class="stat-value">0MB</div>
+        <div class="stat-label">Data Dikirim</div>
+      </div>
+      <div class="stat-item fade-in delay-100">
+        <div class="stat-value">1B+</div>
+        <div class="stat-label">Parameter AI</div>
+      </div>
+      <div class="stat-item fade-in delay-200">
+        <div class="stat-value">100%</div>
+        <div class="stat-label">Offline & Privat</div>
+      </div>
+      <div class="stat-item fade-in delay-300">
+        <div class="stat-value">Rp0</div>
+        <div class="stat-label">Biaya Server</div>
+      </div>
+      <div class="stat-item fade-in delay-400">
+        <div class="stat-value">2</div>
+        <div class="stat-label">AI Agent</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── AGENT SECTION ── -->
+  <section id="agent" class="features-section">
+    <div class="container">
+      <div style="text-align: center; margin-bottom: var(--sp-4);">
+        <span class="section-label">Multi-Agent System</span>
+        <h2>Dua AI, Satu Platform</h2>
+        <p style="max-width: 520px; margin: 0 auto;">
+          Sistem multi-agent dinamis yang bertukar peran berdasarkan kebutuhan Anda secara real-time.
+        </p>
+      </div>
+
+      <div class="agent-grid">
+        <!-- Olivia -->
+        <div class="agent-card olivia fade-in">
+          <div style="font-size: 3rem; margin-bottom: var(--sp-3);">🌸</div>
+          <div class="agent-name">Olivia Valen</div>
+          <div class="agent-role">Virtual Companion · Game Mode</div>
+          <p style="font-size: 0.875rem; line-height: 1.7; color: var(--clr-text-secondary); margin: 0;">
+            Karakter AI perempuan yang tenang, dewasa, dan protektif. Dilengkapi <strong style="color: #f472b6;">Emotion Engine</strong>
+            yang mendeteksi sentimen negatif dan menyesuaikan respons menjadi lebih menenangkan dan hangat.
+            Percakapan tersimpan privat di browser Anda.
+          </p>
+          <div style="margin-top: var(--sp-4); display: flex; gap: var(--sp-2); flex-wrap: wrap;">
+            <span class="badge badge-pink">Emotion Engine</span>
+            <span class="badge badge-violet">Multi-turn Memory</span>
+          </div>
+        </div>
+
+        <!-- AIRA -->
+        <div class="agent-card aira fade-in delay-100">
+          <div style="font-size: 3rem; margin-bottom: var(--sp-3);">🔧</div>
+          <div class="agent-name">AIRA ACS</div>
+          <div class="agent-role">AI Customer Service · Support Mode</div>
+          <p style="font-size: 0.875rem; line-height: 1.7; color: var(--clr-text-secondary); margin: 0;">
+            AI Customer Service cerdas yang memecahkan kendala teknis game secara logis menggunakan
+            <strong style="color: #60a5fa;">Keyword-Matching RAG lokal</strong> dari knowledge base JSON.
+            Solusi terstruktur tanpa koneksi internet.
+          </p>
+          <div style="margin-top: var(--sp-4); display: flex; gap: var(--sp-2); flex-wrap: wrap;">
+            <span class="badge badge-blue">Local RAG</span>
+            <span class="badge badge-cyan">Problem Solver</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ABOUT ── -->
+  <section id="tentang" class="about-section">
+    <div class="container">
+      <div class="about-grid">
+        <div class="fade-in-left">
+          <span class="section-label">Konsep Utama</span>
+          <h2 style="margin-bottom: var(--sp-5);">
+            Masa Depan AI Interaksi,<br>
+            <span class="gradient-text-pink">Tanpa Kompromi Privasi</span>
+          </h2>
+          <p style="font-size: 1rem; line-height: 1.8; margin-bottom: var(--sp-5);">
+            Olivia bukan sekadar chatbot kaku. Menggunakan
+            <strong style="color: var(--clr-neon-pink);">model bahasa Llama 3.2 1B</strong>
+            yang berjalan sepenuhnya di GPU browser via WebGPU, setiap percakapan dirajut secara
+            unik dan kontekstual berdasarkan memori percakapan Anda.
+          </p>
+          <p style="line-height: 1.8; margin-bottom: var(--sp-5);">
+            Seluruh komputasi terjadi di memori browser — percakapan tersimpan privat, model berjalan
+            offline setelah download awal, dan tidak satu kata pun meninggalkan perangkat Anda.
+            <strong style="color: var(--clr-neon-cyan);">Nol biaya server untuk developer.</strong>
+          </p>
+          <div style="display: flex; gap: var(--sp-3); flex-wrap: wrap;">
+            <a href="./game.html" class="btn btn-primary glow-pink">🚀 Jelajahi Sekarang</a>
+            <a href="#fitur"      class="btn btn-ghost">📋 Lihat Fitur</a>
+          </div>
+        </div>
+
+        <div class="about-visual fade-in-right">
+          <div class="about-visual-icon"><img src="./assets/colab.png" alt="✨" /></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FEATURES GRID ── -->
+  <section id="fitur" class="features-section" style="padding-top: 0;">
+    <div class="container">
+      <div style="text-align: center; margin-bottom: var(--sp-12);">
+        <span class="section-label">Fitur Unggulan</span>
+        <h2>Apa yang Membuat Olivia AI Berbeda?</h2>
+      </div>
+
+      <div class="grid-3">
+        <!-- Card 1: Privacy -->
+        <div class="feature-card fade-in">
+          <div class="feature-icon-wrap">🛡️</div>
+          <h4>Keamanan Privasi Absolut</h4>
+          <p>
+            Tidak ada data yang dikirim ke server eksternal. Semua proses AI — percakapan,
+            pembelajaran kontekstual, memori — selamanya tersimpan di perangkat Anda sendiri.
+            Tidak ada pihak ketiga yang bisa mengaksesnya.
+          </p>
+        </div>
+
+        <!-- Card 2: Zero Server Cost -->
+        <div class="feature-card fade-in delay-100">
+          <div class="feature-icon-wrap" style="background: rgba(37,99,235,0.12); border-color: rgba(37,99,235,0.3);">💰</div>
+          <h4>Nol Biaya Server untuk Developer</h4>
+          <p>
+            Arsitektur Client-Side Edge AI mengeliminasi 100% biaya server, API berbayar, dan
+            infrastruktur cloud. Skalabilitas tanpa batas tanpa pengeluaran operasional tambahan
+            berapapun jumlah pengguna.
+          </p>
+        </div>
+
+        <!-- Card 3: WebGPU -->
+        <div class="feature-card fade-in delay-200">
+          <div class="feature-icon-wrap" style="background: rgba(0,245,212,0.1); border-color: rgba(0,245,212,0.25);">⚡</div>
+          <h4>Akselerasi WebGPU Tanpa Internet</h4>
+          <p>
+            Dioptimalkan via WebGPU acceleration untuk inferensi AI berkecepatan tinggi langsung
+            di GPU browser Anda. Setelah model ter-download sekali, aplikasi berjalan 100% offline
+            selamanya tanpa koneksi internet.
+          </p>
+        </div>
+
+        <!-- Card 4: Emotion Engine -->
+        <div class="feature-card fade-in delay-300">
+          <div class="feature-icon-wrap" style="background: rgba(244,114,182,0.12); border-color: rgba(244,114,182,0.3);">💗</div>
+          <h4>Emotion Detection Engine</h4>
+          <p>
+            Sistem deteksi sentimen yang menganalisis emosi dalam teks input. Saat emosi negatif
+            terdeteksi, Olivia secara otomatis menyesuaikan responsnya menjadi lebih protektif,
+            menenangkan, dan empatik.
+          </p>
+        </div>
+
+        <!-- Card 5: RAG -->
+        <div class="feature-card fade-in delay-400">
+          <div class="feature-icon-wrap" style="background: rgba(6,214,160,0.12); border-color: rgba(6,214,160,0.3);">🔍</div>
+          <h4>Local RAG Knowledge Base</h4>
+          <p>
+            AIRA menggunakan sistem Retrieval-Augmented Generation berbasis JSON lokal dengan
+            weighted keyword-matching. Menjawab pertanyaan teknis dengan akurat tanpa API
+            pencarian eksternal.
+          </p>
+        </div>
+
+        <!-- Card 6: Multi-turn Memory -->
+        <div class="feature-card fade-in delay-500">
+          <div class="feature-icon-wrap" style="background: rgba(123,47,255,0.15); border-color: rgba(123,47,255,0.3);">🧠</div>
+          <h4>Memori Multi-Turn Chat</h4>
+          <p>
+            Riwayat percakapan tersimpan di localStorage per username dan mode. Context window
+            dioptimalkan dengan teknik sliding window 4 pasangan terakhir untuk efisiensi token
+            maksimal tanpa kehilangan konteks.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA ── -->
+  <section class="cta-section">
+    <div style="margin-bottom: var(--sp-3);">
+      <span class="badge badge-pink">Siap Digunakan</span>
+    </div>
+    <h2 style="margin-bottom: var(--sp-4); font-size: clamp(1.75rem, 5vw, 3rem);">
+      Siap Bertemu <span class="gradient-text">Olivia</span>?
+    </h2>
+    <p style="color: var(--clr-text-secondary); font-size: 1.125rem; max-width: 500px; margin: 0 auto var(--sp-8);">
+      Mulai petualangan interaksi AI lokal Anda sekarang. Gratis, tanpa registrasi,
+      tanpa server, tanpa batasan.
+    </p>
+    <div style="display: flex; gap: var(--sp-4); justify-content: center; flex-wrap: wrap;">
+      <a href="./game.html" class="btn btn-primary btn-xl glow-pink">
+        🚀 Masuki Kamar Virtual
+      </a>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand gradient-text-pink">OLIVIA AI</div>
+
+      <div class="footer-links">
+        <a href="#fitur"                                                                    class="footer-link">Fitur</a>
+        <a href="./game.html"                                                               class="footer-link">Demo</a>
+        <a href="./private.html"                                                            class="footer-link">Privasi</a>
+        <a href="https://github.com/Raenith/Olivia-AI-Offline" target="_blank"              class="footer-link">GitHub</a>
+      </div>
+
+      <p class="footer-copy">
+        &copy; 2026 AIRA Project — Client-Side Edge AI · WebGPU · 100% Offline · Zero Server Cost
+        <br>Dikembangkan untuk kompetisi "Build Real AI Agent. Solve Real Problems" — Qhomemart
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', e => {
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    // IntersectionObserver for scroll-triggered animations
+    const observer = new IntersectionObserver(
+      entries => entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.animationPlayState = 'running';
+          observer.unobserve(entry.target);
+        }
+      }),
+      { threshold: 0.12 }
+    );
+
+    document.querySelectorAll(
+      '.fade-in, .fade-in-left, .fade-in-right, .slide-up'
+    ).forEach(el => {
+      el.style.animationPlayState = 'paused';
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>
