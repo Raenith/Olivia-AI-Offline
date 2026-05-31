@@ -5,8 +5,8 @@
 ![Privacy](https://img.shields.io/badge/Privacy-Absolute-ff007f?style=for-the-badge)
 ![Server Cost](https://img.shields.io/badge/Server%20Cost-Rp%200-cyan?style=for-the-badge)
 
-![models](https://drive.google.com/file/d/1uQ426Bx7ZkQ-lbrgLL_UxUTQ_1J40_OK/view?usp=sharing)
-![Demo](https://raenith.github.io/Olivia-AI-Offline/Olivia-AI-WEB/index.html)
+[models](https://drive.google.com/file/d/1uQ426Bx7ZkQ-lbrgLL_UxUTQ_1J40_OK/view?usp=sharing)
+[Demo](https://raenith.github.io/Olivia-AI-Offline/Olivia-AI-WEB/index.html)
 
 OLIVIA AI adalah platform interaksi asisten dan teman virtual 3D/2D berbasis **Edge AI** yang berjalan sepenuhnya di sisi klien (*client-side*). Proyek ini memanfaatkan akselerasi hardware modern menggunakan **WebGPU** untuk menjalankan Large Language Model (LLM) secara lokal langsung di dalam browser tanpa memerlukan server eksternal, koneksi internet berkelanjutan, ataupun biaya API.
 
